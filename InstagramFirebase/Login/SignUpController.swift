@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  SignUpController.swift
 //  InstagramFirebase
 //
 //  Created by Yerlan on 26.01.2022.
@@ -11,7 +11,7 @@ import FirebaseAuth
 import FirebaseDatabase
 import FirebaseStorage
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     let plusPhotoButton: UIButton = {
         let button = UIButton(type: .system)
@@ -164,6 +164,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        navigationController?.isNavigationBarHidden = true
+        
+        view.backgroundColor = .white
         
         view.addSubview(plusPhotoButton)
         
