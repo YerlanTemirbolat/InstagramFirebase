@@ -11,6 +11,23 @@ import FirebaseAuth
 import FirebaseDatabase
 import FirebaseStorage
 
+//class FirebaseManager: NSObject {
+//
+//    let auth: Auth
+//    let storage: Storage
+//
+//    static let shareded = FirebaseManager()
+//
+//    override init() {
+//        FirebaseApp.configure()
+//
+//        self.auth = Auth.auth()
+//        self.storage = Storage.storage()
+//
+//        super.init()
+//    }
+//}
+
 class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     let plusPhotoButton: UIButton = {
@@ -114,7 +131,7 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         guard let username = usernameTextField.text, username.count > 0 else { return }
         guard let password = passwordTextField.text, password.count > 0 else { return }
         
-        Auth.auth().createUser(withEmail: email, password: password, completion: { user, error in
+        Auth.auth().createUser(withEmail: email, password: password) { user, error in
             
             if let err = error {
                 print("Failed to create user:", err)
@@ -126,46 +143,52 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
             guard let image = self.plusPhotoButton.imageView?.image else { return }
             
             guard let uploadData = image.jpegData(compressionQuality: 0.3) else { return }
-                        
-            let storageRef = Storage.storage().reference()
-            let storageRefChild = storageRef.child("user_profile_pictures/\(user?.user.uid).jpg")
-            storageRefChild.putData(uploadData, metadata: nil, completion: { (metadata, err) in
-                if let err = err {
-                    print("Unable to upload image into storage due to: \(err)")
+            
+            let filename = NSUUID().uuidString
+            
+            guard let uid = Auth.auth().currentUser?.uid else { return }
+            
+            let ref = Storage.storage().reference(withPath: uid)
+            
+            ref.putData(uploadData, metadata: nil) { metadata, err in
+                
+                if let err = error {
+                    print("Failed to push image to Storage:", err)
+                    return
                 }
                 
-                storageRefChild.downloadURL(completion: { (url, err) in
-                    if let err = err {
-                        print("Unable to retrieve URL due to error: \(err.localizedDescription)")
+                ref.downloadURL { url, err in
+                    
+                    if let err = error {
+                        print("Failed to retrieve downloadURL:", err)
                         return
                     }
-                    let profilePicUrl =  url?.absoluteString
-                    print("Profile Image successfully uploaded into storage with url: \(profilePicUrl ?? "" )")
+                    
+                    print("Successfully stored image with url:", url?.absoluteString ?? "")
                     
                     guard let uid = user?.user.uid else { return }
-                    
-                    let dictionaryValues = ["username": username, "profileImageUrl": profilePicUrl]
+
+                    let dictionaryValues = ["username": username, "profileImageUrl": url] as [String : Any]
                     let values = [uid: dictionaryValues]
-                    
-                    Database.database().reference().child("USER-INFO").updateChildValues(values) { err, ref in
-                        
+
+                    Database.database().reference().child("users").updateChildValues(values, withCompletionBlock: { (err, ref) in
+
                         if let err = err {
-                            print("Failed to save user into db:", err)
+                            print("Failed to save user info into db:", err)
                             return
                         }
-                        
-                        print("Successfully saved user into to db.")
-                        
+
+                        print("Successfully saved user info to db")
+                    
                         guard let mainTabBarController = UIApplication.shared.keyWindow?.rootViewController as? MainTabBarController else { return }
-                        
+
                         mainTabBarController.setupViewControllers()
-                        
+                    
                         self.dismiss(animated: true, completion: nil)
-                    }
-                })
-            })
-            
-        })
+                    })
+                }
+            }
+        }
     }
 
     let alreadyHaveAccountButton: UIButton = {

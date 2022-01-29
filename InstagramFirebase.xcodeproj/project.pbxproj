@@ -133,12 +133,12 @@
 				43194A5027A166210023AB63 /* Utils */,
 				43194A2027A07D8A0023AB63 /* AppDelegate.swift */,
 				43194A2227A07D8A0023AB63 /* SceneDelegate.swift */,
+				43194A5527A32ABB0023AB63 /* MainTabBarController.swift */,
 				43194A2627A07D8A0023AB63 /* Main.storyboard */,
 				43194A2927A07D8C0023AB63 /* Assets.xcassets */,
 				43194A2B27A07D8C0023AB63 /* LaunchScreen.storyboard */,
 				43194A2E27A07D8C0023AB63 /* Info.plist */,
 				43194A5327A1A6390023AB63 /* GoogleService-Info.plist */,
-				43194A5527A32ABB0023AB63 /* MainTabBarController.swift */,
 			);
 			path = InstagramFirebase;
 			sourceTree = "<group>";
