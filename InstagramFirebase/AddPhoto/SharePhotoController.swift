@@ -6,6 +6,9 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseAuth
+import FirebaseStorage
 
 class SharePhotoController: UIViewController {
     
@@ -56,6 +59,52 @@ class SharePhotoController: UIViewController {
     
     @objc func handleShare() {
         
+        guard let image = selectedImage else { return }
+
+        guard let uploadData = image.jpegData(compressionQuality: 0.3) else { return }
+
+        let filename = NSUUID().uuidString
+
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        let ref = Storage.storage().reference(withPath: uid)
+
+        ref.putData(uploadData, metadata: nil) { metadata, err in
+
+            if let err = err {
+                print("Failed to push image to Storage:", err)
+                return
+            }
+
+            ref.downloadURL { url, err in
+
+                if let err = err {
+                    print("Failed to retrieve downloadURL:", err)
+                    return
+                }
+
+                print("Successfully stored image with url:", url?.absoluteString ?? "")
+
+                let dictionaryValues = ["username": username, "profileImageUrl": url] as [String : Any]
+                let values = [uid: dictionaryValues]
+
+                Database.database().reference().child("users").updateChildValues(values, withCompletionBlock: { (err, ref) in
+
+                    if let err = err {
+                        print("Failed to save user info into db:", err)
+                        return
+                    }
+
+                    print("Successfully saved user info to db")
+
+                    guard let mainTabBarController = UIApplication.shared.keyWindow?.rootViewController as? MainTabBarController else { return }
+
+                    mainTabBarController.setupViewControllers()
+
+                    self.dismiss(animated: true, completion: nil)
+                })
+            }
+        }
     }
     
     var preferredStatusBarHidden: Bool {

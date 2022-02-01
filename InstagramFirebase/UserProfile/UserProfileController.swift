@@ -5,8 +5,10 @@
 //  Created by Yerlan on 28.01.2022.
 //
 
-import Firebase
 import UIKit
+import Firebase
+import FirebaseAuth
+import FirebaseStorage
 
 
 class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout {

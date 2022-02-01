@@ -10,6 +10,8 @@ import Firebase
 import FirebaseAuth
 import FirebaseDatabase
 import FirebaseStorage
+import FirebaseFirestore
+
 
 //class FirebaseManager: NSObject {
 //
@@ -132,40 +134,40 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         guard let password = passwordTextField.text, password.count > 0 else { return }
         
         Auth.auth().createUser(withEmail: email, password: password) { user, error in
-            
+
             if let err = error {
                 print("Failed to create user:", err)
                 return
             }
-            
+
             print("Successfully created user:", user?.user.uid ?? "")
-            
+
             guard let image = self.plusPhotoButton.imageView?.image else { return }
-            
+
             guard let uploadData = image.jpegData(compressionQuality: 0.3) else { return }
-            
+
             let filename = NSUUID().uuidString
-            
+
             guard let uid = Auth.auth().currentUser?.uid else { return }
-            
+
             let ref = Storage.storage().reference(withPath: uid)
-            
+
             ref.putData(uploadData, metadata: nil) { metadata, err in
-                
+
                 if let err = error {
                     print("Failed to push image to Storage:", err)
                     return
                 }
-                
+
                 ref.downloadURL { url, err in
-                    
+
                     if let err = error {
                         print("Failed to retrieve downloadURL:", err)
                         return
                     }
-                    
+
                     print("Successfully stored image with url:", url?.absoluteString ?? "")
-                    
+
                     guard let uid = user?.user.uid else { return }
 
                     let dictionaryValues = ["username": username, "profileImageUrl": url] as [String : Any]
@@ -179,11 +181,11 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
                         }
 
                         print("Successfully saved user info to db")
-                    
+
                         guard let mainTabBarController = UIApplication.shared.keyWindow?.rootViewController as? MainTabBarController else { return }
 
                         mainTabBarController.setupViewControllers()
-                    
+
                         self.dismiss(animated: true, completion: nil)
                     })
                 }
@@ -206,6 +208,34 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
     @objc func handleAlreadyHaveAccount() {
         navigationController?.popViewController(animated: true)
     }
+    
+    /*func upload(currentUserId: String, photo: UIImage, completion: @escaping (Result<URL, Error>) -> Void) {
+        
+        let ref = Storage.storage().reference().child("avatars").child(currentUserId)
+        
+        guard let imageData = plusPhotoButton.imageView?.image?.jpegData(compressionQuality: 0.3) else { return }
+        
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+        
+        ref.putData(imageData, metadata: metadata) { metadata, error in
+            
+            guard let _ = metadata else {
+                completion(.failure(error!))
+                return
+            }
+            
+            ref.downloadURL { url, error in
+                
+                guard let url = url else {
+                    completion(.failure(error!))
+                    return
+                }
+                
+                completion(.success(url))
+            }
+        }
+    }*/
     
     override func viewDidLoad() {
         super.viewDidLoad()
