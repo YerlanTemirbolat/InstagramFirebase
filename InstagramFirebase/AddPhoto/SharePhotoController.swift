@@ -85,10 +85,10 @@ class SharePhotoController: UIViewController {
 
                 print("Successfully stored image with url:", url?.absoluteString ?? "")
 
-                let dictionaryValues = ["username": username, "profileImageUrl": url] as [String : Any]
-                let values = [uid: dictionaryValues]
+//                let dictionaryValues = ["username": username, "profileImageUrl": url] as [String : Any]
+//                let values = [uid: dictionaryValues]
 
-                Database.database().reference().child("users").updateChildValues(values, withCompletionBlock: { (err, ref) in
+                Database.database().reference().child("users").updateChildValues([:], withCompletionBlock: { (err, ref) in
 
                     if let err = err {
                         print("Failed to save user info into db:", err)
